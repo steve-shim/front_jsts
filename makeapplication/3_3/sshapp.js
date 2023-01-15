@@ -1,6 +1,7 @@
 const ajax = new XMLHttpRequest();
 
 const NEWS_URL = 'https://api.hnpwa.com/v0/news/1.json';
+const CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json';
 
 //동기적(false)으로 데이터를 받아오겠다
 ajax.open('GET', NEWS_URL, false);
@@ -15,12 +16,18 @@ console.log("newsFeed",newsFeed)
 
 const ul = document.createElement('ul');
 
+window.addEventListener('hashchange', function() {
+    console.log("hash변경")
+})
+
 for(let i = 0; i < 10; i++) {
     const li = document.createElement('li');
     const a = document.createElement('a');
 
-    a.href = `#`;
+    a.href = `#${newsFeed[i].id}`;
     a.innerHTML = `${newsFeed[i].title} (${newsFeed[i].comments_count})`;
+
+    //a.addEventListener('click', function() {})
 
     li.appendChild(a);
     ul.appendChild(li);
