@@ -13,9 +13,11 @@ ajax.send();
 const newsFeed = JSON.parse(ajax.response);
 console.log("newsFeed",newsFeed)
 
-document.getElementById('root').innerHTML = `
+const ul = document.createElement('ul');
+
+for(let i = 0; i < 10; i++) {
+    document.getElementById('root').innerHTML = `
     <ul>
-        <li>${newsFeed[0].title}</li>
-        <li>${newsFeed[1].title}</li>    
-        <li>${newsFeed[2].title}</li>        
+        <li>${newsFeed[i].title}</li>       
     </ul>`;
+}
