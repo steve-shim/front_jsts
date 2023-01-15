@@ -16,8 +16,9 @@ console.log("newsFeed",newsFeed)
 const ul = document.createElement('ul');
 
 for(let i = 0; i < 10; i++) {
-    document.getElementById('root').innerHTML = `
-    <ul>
-        <li>${newsFeed[i].title}</li>       
-    </ul>`;
+    const li = document.createElement('li');
+    li.innerHTML = newsFeed[i].title;      
+    ul.appendChild(li);
 }
+
+document.getElementById('root').appendChild(ul);
