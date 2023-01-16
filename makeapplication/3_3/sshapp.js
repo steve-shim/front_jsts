@@ -1,3 +1,6 @@
+//DOM API를 사용하면 UI의 구조가 잘 드러나지x
+//DOM API를 최대한 사용하지 않고 문자열만들 가지고 UI를 만든다 
+
 const container = document.getElementById('root')
 const ajax = new XMLHttpRequest();
 //불러온 content를 표시할 영역 확보
@@ -39,16 +42,27 @@ window.addEventListener('hashchange', function() {
 })
 
 for(let i = 0; i < 10; i++) {
-    const li = document.createElement('li');
-    const a = document.createElement('a');
+    const div = document.createElement('div');
+    // const li = document.createElement('li');
+    // const a = document.createElement('a');
 
-    a.href = `#${newsFeed[i].id}`;
-    a.innerHTML = `${newsFeed[i].title} (${newsFeed[i].comments_count})`;
-
-    //a.addEventListener('click', function() {})
-
-    li.appendChild(a);
-    ul.appendChild(li);
+    // a.href = `#${newsFeed[i].id}`;
+    // a.innerHTML = `${newsFeed[i].title} (${newsFeed[i].comments_count})`;
+    
+    //문자열안에 들어있는 태그를 DOM요소로 바꿔줘야하는데
+    //innerHTML의 속성을 제공해주는 임시 DOM(div)이 필요
+    div.innerHTML = `
+    <li>
+        <a href="#${newsFeed[i].id}">
+            ${newsFeed[i].title} (${newsFeed[i].comments_count})
+        </a>
+    </li>
+    `
+    // li.appendChild(a);
+    // ul.appendChild(li);
+    //ul태그의 자식으로 div 태그는 필요없고 ul태그 하위로 li태그들이 필요하다
+    //ul.appendChild(div.children[0]);
+    ul.appendChild(div.firstElementChild);
 }
 
 container.appendChild(ul);
