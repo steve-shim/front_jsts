@@ -8,15 +8,18 @@ const content = document.createElement('div');
 const NEWS_URL = 'https://api.hnpwa.com/v0/news/1.json';
 const CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json';
 
-//동기적(false)으로 데이터를 받아오겠다
-ajax.open('GET', NEWS_URL, false);
-ajax.send();
+function getData(url) {
+    //동기적(false)으로 데이터를 받아오겠다
+    ajax.open('GET', url, false);
+    ajax.send();
 
-//JSON 데이터로 네트워크를 통해 데이터를 받아옴
-//console.log("ajax",ajax.response)
+    //JSON 데이터로 네트워크를 통해 데이터를 받아옴
+    return JSON.parse(ajax.response);
+}
+
 
 //JSON 데이터를 객체로 만들겠다
-const newsFeed = JSON.parse(ajax.response);
+const newsFeed = getData(NEWS_URL);
 console.log("newsFeed",newsFeed)
 
 const ul = document.createElement('ul');
@@ -29,10 +32,7 @@ window.addEventListener('hashchange', function() {
     console.log("location.hash",location.hash) // #34403684
     const id = location.hash.substr(1)
     
-    ajax.open('GET', CONTENT_URL.replace('@id', id), false);
-    ajax.send();
-
-    const newsContent = JSON.parse(ajax.response)
+    const newsContent = getData(CONTENT_URL.replace('@id', id))
     const title = document.createElement('h1');
 
     title.innerHTML = newsContent.title;
