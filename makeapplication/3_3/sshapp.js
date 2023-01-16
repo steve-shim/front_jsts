@@ -1,5 +1,7 @@
+const container = document.getElementById('root')
 const ajax = new XMLHttpRequest();
-
+//불러온 content를 표시할 영역 확보
+const content = document.createElement('div');
 const NEWS_URL = 'https://api.hnpwa.com/v0/news/1.json';
 const CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json';
 
@@ -16,8 +18,24 @@ console.log("newsFeed",newsFeed)
 
 const ul = document.createElement('ul');
 
+//window(브라우저창 객체)
+//hashchange가 발생했을 때 뒤에 인자로 전달된 함수가 실행된다
 window.addEventListener('hashchange', function() {
-    console.log("hash변경")
+    
+    //location(브라우저가 기본으로 제공해주는 객체: 주소와 관련한 다양한 정보 제공)
+    console.log("location.hash",location.hash) // #34403684
+    const id = location.hash.substr(1)
+    
+    ajax.open('GET', CONTENT_URL.replace('@id', id), false);
+    ajax.send();
+
+    const newsContent = JSON.parse(ajax.response)
+    const title = document.createElement('h1');
+
+    title.innerHTML = newsContent.title;
+
+    content.appendChild(title);
+    console.log("newsContent",newsContent)
 })
 
 for(let i = 0; i < 10; i++) {
@@ -33,4 +51,7 @@ for(let i = 0; i < 10; i++) {
     ul.appendChild(li);
 }
 
-document.getElementById('root').appendChild(ul);
+container.appendChild(ul);
+//content라는 내용을 담는 div태그를 만들었지만 
+//HTML상에 어디에도 content가 추가되어있지않다
+container.appendChild(content);
