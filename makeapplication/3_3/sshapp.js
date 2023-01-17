@@ -19,17 +19,26 @@ function getData(url) {
     return JSON.parse(ajax.response);
 }
 
+function newsFeed() {
+    const newsFeed = getData(NEWS_URL);
+    const newsList = [];
 
-//JSON 데이터를 객체로 만들겠다
-const newsFeed = getData(NEWS_URL);
-console.log("newsFeed",newsFeed)
+    newsList.push('<ul>')
+    for(let i = 0; i < 10; i++) {
+        newsList.push(`
+        <li>
+            <a href="#${newsFeed[i].id}">
+                ${newsFeed[i].title} (${newsFeed[i].comments_count})
+            </a>
+        </li>
+        `);
+    }
+    newsList.push('</ul>')
 
-const ul = document.createElement('ul');
+    container.innerHTML = newsList.join('')
+}
 
-//window(브라우저창 객체)
-//hashchange가 발생했을 때 뒤에 인자로 전달된 함수가 실행된다
-window.addEventListener('hashchange', function() {
-    
+function newsDetail() {
     //location(브라우저가 기본으로 제공해주는 객체: 주소와 관련한 다양한 정보 제공)
     console.log("location.hash",location.hash) // #34403684
     const id = location.hash.substr(1)
@@ -43,26 +52,24 @@ window.addEventListener('hashchange', function() {
             <a href="#">목록으로</a>
         </div>
     `;
-    // title.innerHTML = newsContent.title;
-
-    // content.appendChild(title);
-    // console.log("newsContent",newsContent)
-})
-
-const newsList = [];
-
-newsList.push('<ul>')
-for(let i = 0; i < 10; i++) {
-    const div = document.createElement('div');
-    
-    newsList.push(`
-    <li>
-        <a href="#${newsFeed[i].id}">
-            ${newsFeed[i].title} (${newsFeed[i].comments_count})
-        </a>
-    </li>
-    `);
 }
-newsList.push('</ul>')
 
-container.innerHTML = newsList.join('')
+function router() {
+    //routePath를 보고 글 목록을 보여줄지 글 내용을 보여줄지 결정
+    const routePath = location.hash
+    console.log("routePath",routePath)
+    if (routePath === '') { 
+        // location.hash에 #만 들어가는 경우엔 빈값을 반환
+        //글 목록
+        newsFeed()
+    } else {
+        //글 본문
+        newsDetail()
+    }
+}
+
+//window(브라우저창 객체)
+//hashchange가 발생했을 때 뒤에 인자로 전달된 함수가 실행된다
+window.addEventListener('hashchange', router)
+
+router()
