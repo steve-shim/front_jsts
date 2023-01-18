@@ -27,8 +27,21 @@ function getData(url) {
 function newsFeed() {
     const newsFeed = getData(NEWS_URL);
     const newsList = [];
+    // template만 봐도 해당 UI가 어떻게 생겼는지 알 수 있고
+    // 어떤 데이터가 여기에 들어갈거야라고 하는 마킹된 위치도 정확하게 파악 가능
+    let template = `
+    <div class="container mx-auto p-4">
+        <h1>Hacker News</h1>
+        <ul>
+            {{__news_feed__}}
+        </ul>
+        <div>
+            <a href="#/page/{{__prev_page__}}">이전 페이지</a>
+            <a href="#/page/{{__next_page__}}">다음 페이지</a>
+        </div>
+    </div>
+    `;
 
-    newsList.push('<ul>')
     for(let i = (store.currentPage - 1) * 10; i < store.currentPage * 10; i++) {
         newsList.push(`
         <li>
@@ -38,14 +51,12 @@ function newsFeed() {
         </li>
         `);
     }
-    newsList.push('</ul>')
-    newsList.push(`
-        <div>
-            <a href="#/page/${store.currentPage > 1 ? store.currentPage - 1 : 1}">이전 페이지</a>
-            <a href="#/page/${store.currentPage + 1}">다음 페이지</a>
-        </div>
-    `);
-    container.innerHTML = newsList.join('')
+    
+    template = template.replace('{{__news_feed__}}', newsList.join(''));
+    template = template.replace('{{__prev_page__}}', store.currentPage > 1 ? store.currentPage - 1 : 1);
+    template = template.replace('{{__next_page__}}', store.currentPage + 1);
+
+    container.innerHTML = template
 }
 
 function newsDetail() {
