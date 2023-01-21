@@ -11,6 +11,7 @@ const CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json';
 //여러 함수들에 걸쳐서 접근하는 공유되는 자원들을 하나로 묶어 둠
 const store = {
     currentPage: 1,
+    feeds: []
 }
 
 //공통된 코드를 묶는 구조로서 함수사용
@@ -24,8 +25,16 @@ function getData(url) {
     return JSON.parse(ajax.response);
 }
 
+function makeFeeds(feeds) {
+    for (let i = 0; i < feeds.length; i++) {
+        feeds[i].read = false;
+    }
+    return feeds;
+}
+
 function newsFeed() {
-    const newsFeed = getData(NEWS_URL);
+    //const newsFeed = getData(NEWS_URL);
+    let newsFeed = store.feeds;
     const newsList = [];
     // template만 봐도 해당 UI가 어떻게 생겼는지 알 수 있고
     // 어떤 데이터가 여기에 들어갈거야라고 하는 마킹된 위치도 정확하게 파악 가능
@@ -54,10 +63,15 @@ function newsFeed() {
         </div>
     `;
 
+    if (newsFeed.length === 0) {
+        // 불러온 모든 데이터의 KEY 값에 read 속성을 추가한다
+        newsFeed = store.feeds = makeFeeds(getData(NEWS_URL));
+    }
+
     for(let i = (store.currentPage - 1) * 10; i < store.currentPage * 10; i++) {
         newsList.push(`
         <div class="p-6 ${newsFeed[i].read ? 'bg-red-500' : 'bg-white'} mt-6 rounded-lg shadow-md transition-colors duration-500 hover:bg-green-100">
-            <div class="flex">
+            <div class="flex"> 
                 <div class="flex-auto">
                     <a href="#/show/${newsFeed[i].id}">${newsFeed[i].title}</a>  
                 </div>
@@ -117,6 +131,13 @@ function newsDetail() {
         </div>
     `;
 
+    for (let i = 0; i < store.feeds.length; i++) {
+        if (store.feeds[i].id === Number(id)) {
+            store.feeds[i].read = true;
+            break;
+        }
+    }
+
     function makeComment(comments, called = 0) {
         const commentString = [];
 
@@ -133,9 +154,9 @@ function newsDetail() {
 
             if (comments[i].comments.length > 0) {
                 commentString.push(makeComment(comments[i].comments, called + 1));
+                console.log("commentString.length",commentString.length)
             }
         }
-        console.log("commentString.length",commentString.length)
         return commentString.join('');
     }
 
