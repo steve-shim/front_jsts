@@ -5,15 +5,33 @@ type Store = {
 }
 // feeds: NewsFeed 유형의 데이터가 들어가는 배열
 
-type NewsFeed = {
+type News = {
   id: number;
-  comments_count: number;
+  time_ago: string;
+  title: string;
   url: string;
   user: string;
-  time_ago: string;
+  content: string;
+}
+
+// 공통 Type과 자신만의 Type을 intersection으로 공통 Type 제거
+type NewsFeed = News & {
+  comments_count: number;
   points: number;
-  title: string;
   read?: boolean;
+}
+
+type NewsDetail = News & {
+  comments: NewsCommnet[];
+}
+
+type NewsCommnet = News & {
+  // id: number;
+  // user: string;
+  // time_age: string;
+  // content: string;
+  comments: [];
+  level: number;
 }
 
 const container: HTMLElement | null = document.getElementById('root');
@@ -25,7 +43,7 @@ const store: Store = {
   feeds: [],
 };
 
-function getData(url) {
+function getData(url: string): NewsFeed[] | NewsDetail {
   ajax.open('GET', url, false);
   ajax.send();
 
