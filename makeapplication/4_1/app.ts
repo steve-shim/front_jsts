@@ -52,13 +52,49 @@ const store: Store = {
   feeds: [],
 };
 
-// function getData(url: string): NewsFeed[] | NewsDetail
-function getData<AjaxResponse>(url: string): AjaxResponse {
-  ajax.open('GET', url, false);
-  ajax.send();
+class Api {
+  url: string;
+  ajax: XMLHttpRequest;
+  // 생성자 -> 외부로부터 데이터를 받고 this.속성을 활용해서 내부에 저장을 해놔야함
+  // 내부 저장목적으로 클래스 내부 속성 url,ajax 추가
+  // this: 클래스 내부요소로 접근(인스턴스 객체에 접근하는 지시어)
+  constructor(url: string) {
+    this.url = url;
+    this.ajax = new XMLHttpRequest();
+  }
+  
+  // 코드의 집합은 함수로 묶는다
+  // API class를 확장한 하위 class에서 사용할 용도로 만든 메소드
+  // 내부로직 처리 메소드고 외부 노출이 안되게하고자 한다면 protected를 쓴다
+  protected getRequest<AjaxResponse>(): AjaxResponse {
+    this.ajax.open('GET', this.url, false);
+    this.ajax.send();
 
-  return JSON.parse(ajax.response);
+    return JSON.parse(this.ajax.response);
+  }
 }
+
+// getData는 바깥쪽에서 API 호출(인스턴스.getData())을 위해서 사용하는 용도로 만든 메소드
+class NewsFeedApi extends Api {
+  getData(): NewsFeed[] {
+    // 상위클래스(Api)의 메소드 혹은 특성들은 인스턴스 객체(this)를 통해서 접근 가능
+    return this.getRequest<NewsFeed[]>();
+  }
+}
+
+class NewsDetailApi extends Api {
+  getData(): NewsDetail {
+    return this.getRequest<NewsDetail>();
+  }
+}
+
+// function getData(url: string): NewsFeed[] | NewsDetail
+// function getData<AjaxResponse>(url: string): AjaxResponse {
+//   ajax.open('GET', url, false);
+//   ajax.send();
+
+//   return JSON.parse(ajax.response);
+// }
 
 function makeFeeds(feeds: NewsFeed[]): NewsFeed[] {
   for (let i = 0; i < feeds.length; i++) {
@@ -78,6 +114,7 @@ function updateView(html: string): void {
 }
 
 function newsFeed(): void {
+  const api = new NewsFeedApi(NEWS_URL);
   let newsFeed: NewsFeed[] = store.feeds;
   const newsList = [];
   let template = `
@@ -108,7 +145,10 @@ function newsFeed(): void {
   // 제네릭: 호출하는쪽에서 리턴받을 타입을 명시해주면 getData에서 해당 타입으로 반환해준다
   // 단순 리턴을 Union으로 기술되어 있으면 리턴될때 목록(NewsFeed)이 리턴될지 내용(NewsDetail)이 리턴될지 애매한 상황이 된다
   if (newsFeed.length === 0) {
-    newsFeed = store.feeds = makeFeeds(getData<NewsFeed[]>(NEWS_URL));
+    //newsFeed = store.feeds = makeFeeds(getData<NewsFeed[]>(NEWS_URL));
+    //호출하는 쪽에서 제네릭은 명시하지 않아도 되고 URL을 인자로 넘기지 않아도된다 
+    //+ NewsFeedApi 클래스로 인스턴스를 만드니까 가독성도 좋아짐
+    newsFeed = store.feeds = makeFeeds(api.getData());
   }
 
   for(let i = (store.currentPage - 1) * 10; i < store.currentPage * 10; i++) {
@@ -142,7 +182,9 @@ function newsFeed(): void {
 
 function newsDetail(): void {
   const id = location.hash.substr(7);
-  const newsContent = getData<NewsDetail>(CONTENT_URL.replace('@id', id))
+  const api = new NewsDetailApi(CONTENT_URL.replace('@id', id))
+  //const newsContent = getData<NewsDetail>(CONTENT_URL.replace('@id', id))
+  const newsContent = api.getData();
   let template = `
     <div class="bg-gray-600 min-h-screen pb-8">
       <div class="bg-white text-xl">
