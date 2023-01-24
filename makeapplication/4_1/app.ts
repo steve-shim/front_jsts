@@ -125,13 +125,13 @@ function newsFeed(): void {
   }
 
   template = template.replace('{{__news_feed__}}', newsList.join(''));
-  template = template.replace('{{__prev_page__}}', store.currentPage > 1 ? store.currentPage - 1 : 1);
-  template = template.replace('{{__next_page__}}', store.currentPage + 1);
+  template = template.replace('{{__prev_page__}}', String(store.currentPage > 1 ? store.currentPage - 1 : 1));
+  template = template.replace('{{__next_page__}}', String(store.currentPage + 1));
   
   updateView(template);
 }
 
-function newsDetail() {
+function newsDetail(): void {
   const id = location.hash.substr(7);
   const newsContent = getData<NewsDetail>(CONTENT_URL.replace('@id', id))
   let template = `
@@ -169,37 +169,36 @@ function newsDetail() {
       break;
     }
   }
-
-  function makeComment(comments: NewsCommnet[], called = 0): string {
-    const commentString = [];
-
-    for(let i = 0; i < comments.length; i++) {
-      console.log("called",called);
-      console.log("comments.length",comments.length); 
-      console.log("comments[i].level", comments[i].level) 
-      commentString.push(`
-        <div style="padding-left: ${called * 40}px;" class="mt-4">
-          <div class="text-gray-400">
-            <i class="fa fa-sort-up mr-2"></i>
-            <strong>${comments[i].user}</strong> ${comments[i].time_ago}
-          </div>
-          <p class="text-gray-700">${comments[i].content}</p>
-        </div>      
-      `);
-
-      if (comments[i].comments.length > 0) {
-        commentString.push(makeComment(comments[i].comments, called + 1));
-      }
-    }
-
-    return commentString.join('');
-  }
-
   updateView(template.replace('{{__comments__}}', makeComment(newsContent.comments)))
-
 }
 
-function router() {
+function makeComment(comments: NewsCommnet[]): string {
+  const commentString = [];
+
+  for(let i = 0; i < comments.length; i++) {
+    const comment: NewsCommnet = comments[i];
+
+    console.log("comments.length",comments.length); 
+    console.log("comments[i].level", comments[i].level) 
+    commentString.push(`
+      <div style="padding-left: ${comment.level * 40}px;" class="mt-4">
+        <div class="text-gray-400">
+          <i class="fa fa-sort-up mr-2"></i>
+          <strong>${comment.user}</strong> ${comment.time_ago}
+        </div>
+        <p class="text-gray-700">${comment.content}</p>
+      </div>      
+    `);
+
+    if (comment.comments.length > 0) {
+      commentString.push(makeComment(comment.comments));
+    }
+  }
+
+  return commentString.join('');
+}
+
+function router(): void {
   const routePath = location.hash;
 
   if (routePath === '') {
