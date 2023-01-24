@@ -43,14 +43,15 @@ const store: Store = {
   feeds: [],
 };
 
-function getData(url: string): NewsFeed[] | NewsDetail {
+// function getData(url: string): NewsFeed[] | NewsDetail
+function getData<AjaxResponse>(url: string): AjaxResponse {
   ajax.open('GET', url, false);
   ajax.send();
 
   return JSON.parse(ajax.response);
 }
 
-function makeFeeds(feeds) {
+function makeFeeds(feeds: NewsFeed[]): NewsFeed[] {
   for (let i = 0; i < feeds.length; i++) {
     feeds[i].read = false;
   }
@@ -58,7 +59,7 @@ function makeFeeds(feeds) {
   return feeds;
 }
 
-function updateView(html) {
+function updateView(html: string): void {
   if (container != null) {
     container.innerHTML = html;
   } else {
@@ -67,7 +68,7 @@ function updateView(html) {
   // container가 null을 반환하는 경우에는 innerHTML속성에 접근하지 못하므로 경고
 }
 
-function newsFeed() {
+function newsFeed(): void {
   let newsFeed: NewsFeed[] = store.feeds;
   const newsList = [];
   let template = `
@@ -95,8 +96,10 @@ function newsFeed() {
     </div>
   `;
 
+  // 제네릭: 호출하는쪽에서 리턴받을 타입을 명시해주면 getData에서 해당 타입으로 반환해준다
+  // 단순 리턴을 Union으로 기술되어 있으면 리턴될때 목록(NewsFeed)이 리턴될지 내용(NewsDetail)이 리턴될지 애매한 상황이 된다
   if (newsFeed.length === 0) {
-    newsFeed = store.feeds = makeFeeds(getData(NEWS_URL));
+    newsFeed = store.feeds = makeFeeds(getData<NewsFeed[]>(NEWS_URL));
   }
 
   for(let i = (store.currentPage - 1) * 10; i < store.currentPage * 10; i++) {
@@ -130,7 +133,7 @@ function newsFeed() {
 
 function newsDetail() {
   const id = location.hash.substr(7);
-  const newsContent = getData(CONTENT_URL.replace('@id', id))
+  const newsContent = getData<NewsDetail>(CONTENT_URL.replace('@id', id))
   let template = `
     <div class="bg-gray-600 min-h-screen pb-8">
       <div class="bg-white text-xl">
@@ -167,10 +170,13 @@ function newsDetail() {
     }
   }
 
-  function makeComment(comments, called = 0) {
+  function makeComment(comments: NewsCommnet[], called = 0): string {
     const commentString = [];
 
     for(let i = 0; i < comments.length; i++) {
+      console.log("called",called);
+      console.log("comments.length",comments.length); 
+      console.log("comments[i].level", comments[i].level) 
       commentString.push(`
         <div style="padding-left: ${called * 40}px;" class="mt-4">
           <div class="text-gray-400">
