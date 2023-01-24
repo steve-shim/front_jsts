@@ -1,37 +1,46 @@
 
-type Store = {
+// type Store = {
+//   currentPage: number;
+//   feeds: NewsFeed[];
+// }
+// feeds: NewsFeed 유형의 데이터가 들어가는 배열
+
+// TypeAlias를 interface 방식으로 변경
+interface Store {
   currentPage: number;
   feeds: NewsFeed[];
 }
-// feeds: NewsFeed 유형의 데이터가 들어가는 배열
 
-type News = {
-  id: number;
-  time_ago: string;
-  title: string;
-  url: string;
-  user: string;
-  content: string;
+// 코드상에서 값을 변경하지 못하게 막으려면 readonly type을 추가한다
+// 실수로 request하는 값을 변경해서 서버에 저장된 정보와 mismatch 방지
+interface News {
+  readonly id: number;
+  readonly time_ago: string;
+  readonly title: string;
+  readonly url: string;
+  readonly user: string;
+  readonly content: string;
 }
 
 // 공통 Type과 자신만의 Type을 intersection으로 공통 Type 제거
-type NewsFeed = News & {
-  comments_count: number;
-  points: number;
+// extends News Type을 기반으로 새로운 키값도 추가 가능 
+interface NewsFeed extends News {
+  readonly comments_count: number;
+  readonly points: number;
   read?: boolean;
 }
 
-type NewsDetail = News & {
-  comments: NewsCommnet[];
+interface NewsDetail extends News {
+  readonly comments: NewsCommnet[];
 }
 
-type NewsCommnet = News & {
+interface NewsCommnet extends News {
   // id: number;
   // user: string;
   // time_age: string;
   // content: string;
-  comments: [];
-  level: number;
+  readonly comments: NewsCommnet[];
+  readonly level: number;
 }
 
 const container: HTMLElement | null = document.getElementById('root');
