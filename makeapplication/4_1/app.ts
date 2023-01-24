@@ -52,48 +52,41 @@ const store: Store = {
   feeds: [],
 };
 
-// targetClass로 제공된 class에다가 baseClasses들로 제공된 n개의 class들의 기능들을 합성시킨다
-function applyApiMixins(targetClass: any, baseClasses: any[]) {
-  baseClasses.forEach(baseClass => {
-    Object.getOwnPropertyNames(baseClass.prototype).forEach(name => {
-      const descriptor = Object.getOwnPropertyDescriptor(baseClass.prototype, name);
+class Api {
+  url: string;
+  ajax: XMLHttpRequest;
+  // 생성자 -> 외부로부터 데이터를 받고 this.속성을 활용해서 내부에 저장을 해놔야함
+  // 내부 저장목적으로 클래스 내부 속성 url,ajax 추가
+  // this: 클래스 내부요소로 접근(인스턴스 객체에 접근하는 지시어)
+  constructor(url: string) {
+    this.url = url;
+    this.ajax = new XMLHttpRequest();
+  }
 
-      if (descriptor) {
-        Object.defineProperty(targetClass.prototype, name, descriptor);
-      }
-    })
-  })
-}
+  // 코드의 집합은 함수로 묶는다
+  // API class를 확장한 하위 class에서 사용할 용도로 만든 메소드
+  // 내부로직 처리 메소드고 외부 노출이 안되게하고자 한다면 protected를 쓴다
+  protected getRequest<AjaxResponse>(): AjaxResponse {
+    this.ajax.open('GET', this.url, false);
+    this.ajax.send();
 
-class Api { 
-  getRequest<AjaxResponse>(url: string): AjaxResponse {
-    const ajax = new XMLHttpRequest();
-    ajax.open('GET', url, false);
-    ajax.send();
-
-    return JSON.parse(ajax.response);
+    return JSON.parse(this.ajax.response);
   }
 }
 
 // getData는 바깥쪽에서 API 호출(인스턴스.getData())을 위해서 사용하는 용도로 만든 메소드
-class NewsFeedApi {
+class NewsFeedApi extends Api {
   getData(): NewsFeed[] {
     // 상위클래스(Api)의 메소드 혹은 특성들은 인스턴스 객체(this)를 통해서 접근 가능
-    return this.getRequest<NewsFeed[]>(NEWS_URL);
+    return this.getRequest<NewsFeed[]>();
   }
 }
 
-class NewsDetailApi {
-  getData(id: string): NewsDetail {
-    return this.getRequest<NewsDetail>(CONTENT_URL.replace('@id', id));
+class NewsDetailApi extends Api {
+  getData(): NewsDetail {
+    return this.getRequest<NewsDetail>();
   }
 }
-
-interface NewsFeedApi extends Api {};
-interface NewsDetailApi extends Api {};
-
-applyApiMixins(NewsFeedApi, [Api]);
-applyApiMixins(NewsDetailApi, [Api]);
 
 function makeFeeds(feeds: NewsFeed[]): NewsFeed[] {
   for (let i = 0; i < feeds.length; i++) {
@@ -113,7 +106,7 @@ function updateView(html: string): void {
 }
 
 function newsFeed(): void {
-  const api = new NewsFeedApi();
+  const api = new NewsFeedApi(NEWS_URL);
   let newsFeed: NewsFeed[] = store.feeds;
   const newsList: string[] = [];
   let template = `
@@ -181,9 +174,9 @@ function newsFeed(): void {
 
 function newsDetail(): void {
   const id = location.hash.substr(7);
-  const api = new NewsDetailApi()
+  const api = new NewsDetailApi(CONTENT_URL.replace('@id', id))
   //const newsContent = getData<NewsDetail>(CONTENT_URL.replace('@id', id))
-  const newsContent = api.getData(id);
+  const newsContent = api.getData();
   let template = `
     <div class="bg-gray-600 min-h-screen pb-8">
       <div class="bg-white text-xl">
