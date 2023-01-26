@@ -95,10 +95,10 @@ class NewsDetailApi extends Api {
 // View -> NewsFeedView
 // View -> NewsDetailView
 abstract class View {
-  template: string;
-  renderTemplate: string;
-  container: HTMLElement;
-  htmlList: string[];
+  private template: string;
+  private renderTemplate: string;
+  private container: HTMLElement;
+  private htmlList: string[];
 
   constructor(containerId: string, template: string) {
     const containerElement = document.getElementById(containerId);
@@ -113,17 +113,17 @@ abstract class View {
     this.htmlList = [];
   }
 
-  updateView(): void {
+  protected updateView(): void {
     this.container.innerHTML = this.renderTemplate;
     this.renderTemplate = this.template;
   }
 
   //html 문자열 조각을 추가하는 기능 메소드 제공(데이터에 직접 접근 제한)
-  addHtml(htmlString: string): void {
+  protected addHtml(htmlString: string): void {
     this.htmlList.push(htmlString);
   }
 
-  getHtml(): string {
+  protected getHtml(): string {
     const snapshot = this.htmlList.join('');
     //this.htmlList = []
     //직접 지우기 보다는 메소드를 활용하여 데이터에 접근하는게 더좋다
@@ -131,13 +131,13 @@ abstract class View {
     return snapshot;
   } 
 
-  setTemplateData(key: string, value: string): void {
+  protected setTemplateData(key: string, value: string): void {
     //this.template = this.template.replace(`{{__${key}__}}`, value)
     //원본에 직접 replace하는 대신 복사본에 replace 진행
     this.renderTemplate = this.renderTemplate.replace(`{{__${key}__}}`, value)
   }
 
-  clearHtmlList(): void {
+  private clearHtmlList(): void {
     this.htmlList = [];
   }
 
@@ -207,9 +207,9 @@ class Router {
 // 해당 로직을 실행시키기 위해서 인스턴스를 매번 새로 생성해야하는 문제가 있다
 // 기존 인스턴스 재활용x (클래스 사용하는 이유가 없)
 class NewsFeedView extends View {
-  api: NewsFeedApi;
-  feeds: NewsFeed[];
-
+  private api: NewsFeedApi;
+  private feeds: NewsFeed[];
+  
   constructor(containerId: string) {
     // 상위 클래스를 상속 받을거면 반드시 상위 class의 생성자를 명시적으로 호출해 줘야한다
     let template = `
@@ -251,7 +251,7 @@ class NewsFeedView extends View {
       this.makeFeeds(); 
     }
   }
-
+  
   render(): void {
     // default page 일때는 현재 page 1, next prev할때는 hash값에서 가져오기
     store.currentPage = Number(location.hash.substr(7) || 1);
@@ -291,7 +291,7 @@ class NewsFeedView extends View {
     this.updateView();
   }
 
-  makeFeeds(): void {
+  private makeFeeds(): void {
     for (let i = 0; i < this.feeds.length; i++) {
       this.feeds[i].read = false;
     }
@@ -355,7 +355,7 @@ class NewsDetailView extends View {
   makeComment(comments: NewsCommnet[]): string {
     for(let i = 0; i < comments.length; i++) {
       const comment: NewsCommnet = comments[i];
-  
+      
       console.log("comments.length",comments.length); 
       console.log("comments[i].level", comments[i].level) 
       this.addHtml(`
