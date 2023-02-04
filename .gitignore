@@ -2,3 +2,8 @@ makeapplication/3_3/.cache/*
 makeapplication/3_3/dist/*
 makeapplication/3_3/node_modules/*
 tutorial/*
+
+makeapplication/*/.cache/*
+makeapplication/*/dist/*
+makeapplication/*/node_modules/*
+makeapplication/*/*.json
