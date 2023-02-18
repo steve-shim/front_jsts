@@ -17,8 +17,9 @@ export function createDOM(node) {
 }
 
 export function createElement(tag, props, ...children) {
+  // props에 null이 들어왔을 때 방어코드
   props = props || {};
-  
+  console.log("{ tag, props, children }",{ tag, props, children })
   return { tag, props, children };
 }
 
