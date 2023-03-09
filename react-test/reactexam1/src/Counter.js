@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useCallback, useState } from "react";
 import OddEvenResult from './OddEvenResult';
 import Box from './Box';
+import { useFetch } from "./useFetch";
+
+const baseURL = 'https://jsonplaceholder.typicode.com'
 
 const hardCalculate = (number) => {
     console.log("어려운 계산");
@@ -88,40 +91,62 @@ const Counter = ({ initialValue }) => {
         console.log("someFunction이 변경되었습니다.");
     }, [someFunction]);
 
+    // const [data, setData] = useState(null);
+
+    // const fetchUrl = (type) => {
+    //     fetch(baseURL + '/' + type)
+    //     .then((res) => res.json())
+    //     .then((res) => setData(res))
+    // }
+
+    // useEffect(() => {
+    //     fetchUrl('users');
+    // }, [])
+    const {data, fetchUrl} = useFetch(baseURL, "users");
+
     return (
-        <div>
-            <h2>{count}</h2>
-            <button onClick={onIncrease}>+</button>
-            <button onClick={onDecrease}>-</button>
-            <OddEvenResult count={count} />
-            <h3>어려운 계산기</h3>
-            <input 
-                type="number"
-                value={hardNumber}
-                onChange={(e) => setHardNumber(parseInt(e.target.value))}
-            />
-            <span> + 10000 = {hardSum}</span>
-            <button onClick={() => setToggle(!toggle)}>{toggle.toString()}</button>
-            <br />
-            <button onClick={someFunction}>Call someFunc</button>
-            <h3>쉬운 계산기</h3>
-            <input 
-                type="number"
-                value={easyNumber}
-                onChange={(e) => setEasyNumber(parseInt(e.target.value))}
-            />
-            <span> + 1 = {easySum}</span>
-            <hr />
-            <h3>어느 나라에 있어요?</h3>
-            <p>나라: {location.country}</p>
-            <button onClick={() => setIsKorea(!isKorea)}>비행기 타자</button>
-            <input 
-                type="number"
-                value={size}
-                onChange={(e) => setSizes(e.target.value)}
-            />
-            <Box createBoxStyle={createBoxStyle}></Box>
-        </div>
+        <>
+            <div>
+                <h2>{count}</h2>
+                <button onClick={onIncrease}>+</button>
+                <button onClick={onDecrease}>-</button>
+                <OddEvenResult count={count} />
+                <h3>어려운 계산기</h3>
+                <input 
+                    type="number"
+                    value={hardNumber}
+                    onChange={(e) => setHardNumber(parseInt(e.target.value))}
+                />
+                <span> + 10000 = {hardSum}</span>
+                <button onClick={() => setToggle(!toggle)}>{toggle.toString()}</button>
+                <br />
+                <button onClick={someFunction}>Call someFunc</button>
+                <h3>쉬운 계산기</h3>
+                <input 
+                    type="number"
+                    value={easyNumber}
+                    onChange={(e) => setEasyNumber(parseInt(e.target.value))}
+                />
+                <span> + 1 = {easySum}</span>
+                <hr />
+                <h3>어느 나라에 있어요?</h3>
+                <p>나라: {location.country}</p>
+                <button onClick={() => setIsKorea(!isKorea)}>비행기 타자</button>
+                <input 
+                    type="number"
+                    value={size}
+                    onChange={(e) => setSizes(e.target.value)}
+                />
+                <Box createBoxStyle={createBoxStyle}></Box>
+            </div>
+            <div>
+                <h1>useFetch</h1>
+                <button onClick={() => fetchUrl('users')}>Users</button>
+                <button onClick={() => fetchUrl('posts')}>Posts</button>
+                <button onClick={() => fetchUrl('todos')}>Todos</button>
+                <pre>{JSON.stringify(data, null, 2)}</pre>
+            </div>
+        </>
     );
 };
 
