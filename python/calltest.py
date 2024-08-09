@@ -20,4 +20,5 @@ s = Stuff(1, 2, 3)
 print("s.x",s.x)
 
 s(7, 8)
+s.__call__(10, 20)
 print("s.x",s.x)
